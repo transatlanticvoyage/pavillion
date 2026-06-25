@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pavilion</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <div class="silo-container">
+      <div class="silo-a">silo a</div>
+      <div class="main-content">
+    <div class="tab-bar">
+      <div class="app-title">Pavilion</div>
+      <div class="tabs">
+        <button class="tab-button active" data-group="finder">Floodtrain View</button>
+        <button class="tab-button" data-group="1">Streams 1-5</button>
+        <button class="tab-button" data-group="2">Streams 6-10</button>
+        <button class="tab-button" data-group="jupiter">jupiter</button>
+        <button class="tab-button" data-group="meridian">meridian board</button>
+        <div class="dropdown-container">
+          <button class="tab-button dropdown-toggle" id="more-dropdown">More ▼</button>
+          <div class="dropdown-menu" id="more-menu">
+            <button class="dropdown-item tab-button" data-group="filegun">Filegun</button>
+            <button class="dropdown-item tab-button" data-group="folderjar">FolderJar</button>
+            <button class="dropdown-item tab-button" data-group="fobjectjar">FobjectJar</button>
+          </div>
+        </div>
+      </div>
+      <div class="tab-actions">
+        <button id="add-folder-btn" class="action-button" style="display: none;">+ Add Folder</button>
+        
+        <div class="stream-management" id="stream-management" style="display: flex;">
+          <select id="stream-select" class="stream-select">
+            <option value="">Select Stream</option>
+            <option value="1">Stream 1</option>
+            <option value="2">Stream 2</option>
+            <option value="3">Stream 3</option>
+            <option value="4">Stream 4</option>
+            <option value="5">Stream 5</option>
+            <option value="6">Stream 6</option>
+            <option value="7">Stream 7</option>
+            <option value="8">Stream 8</option>
+            <option value="9">Stream 9</option>
+            <option value="10">Stream 10</option>
+          </select>
+          
+          <button id="add-to-stream-btn" class="action-button" disabled>Add Selected Folder To Stream</button>
+        </div>
+        
+        <div class="copy-paste-methods" id="copy-paste-methods">
+          <div class="active-drum-indicator">
+            <span class="active-drum-label">active_drum:</span>
+            <span id="active-drum-text" class="active-drum-text">none selected</span>
+          </div>
+          <button id="open-in-finder-btn" class="method-button">open in finder</button>
+          <button id="copy-m1-btn" class="method-button">copy (method 1)</button>
+          <button id="paste-m1-btn" class="method-button">paste (m1)</button>
+          <button id="copy-m2-btn" class="method-button">copy (method 2)</button>
+          <button id="paste-m2-btn" class="method-button">paste (m2)</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Bar2 - New visual bar -->
+    <div class="bar2">
+      <div class="bar2-label">Bar2</div>
+      <div class="bar2-content">
+        <!-- Column width controls for Floodtrain View -->
+        <div id="column-width-controls" class="column-width-controls" style="display: flex;">
+          <button class="width-button width-label" disabled>main viewer pane column widths:</button>
+          <button class="width-button" data-width="100">100</button>
+          <button class="width-button" data-width="200">200</button>
+          <button class="width-button" data-width="250">250</button>
+          <button class="width-button active" data-width="300">300</button>
+          <button class="width-button" data-width="350">350</button>
+          <button class="width-button" data-width="400">400</button>
+          <button class="width-button" data-width="auto">100%</button>
+        </div>
+        <button id="pistol-popup-btn" class="pistol-popup-btn">pistol popup</button>
+      </div>
+    </div>
+
+    <!-- Pistol Popup Modal -->
+    <div id="pistol-popup-overlay" class="pistol-overlay" style="display:none;">
+      <div class="pistol-modal">
+        <div class="pistol-modal-header">
+          <h2 class="pistol-modal-title">pistol popup</h2>
+
+          <div class="pistol-source-section">
+            <div class="pistol-source-radios">
+              <label class="pistol-radio-option">
+                <input type="radio" name="pistol-source" id="pistol-radio-basin" value="basin" checked>
+                <span>use a designated basin</span>
+              </label>
+              <label class="pistol-radio-option">
+                <input type="radio" name="pistol-source" id="pistol-radio-silom" value="silo-m">
+                <span>use currently active "silo m" folder</span>
+              </label>
+            </div>
+            <div class="pistol-source-sub">
+              <div class="pistol-source-sub-item">
+                <select class="pistol-basin-select" id="pistol-basin-select">
+                  <option value="">— select a basin —</option>
+                </select>
+              </div>
+              <div class="pistol-source-sub-item">
+                <input type="text" readonly class="pistol-silom-display" id="pistol-silom-display" placeholder="— no active folder in silo m —">
+              </div>
+            </div>
+          </div>
+
+          <button id="pistol-popup-close" class="pistol-close-btn">✕</button>
+        </div>
+        <div class="pistol-modal-body">
+          <div class="mead-panel">
+
+            <!-- Target path -->
+            <div class="mead-row">
+              <span class="mead-label">actual target path</span>
+              <div class="mead-path-display" id="pistol-mead-path">—</div>
+            </div>
+
+            <!-- Crater number + filename input -->
+            <div class="mead-row mead-input-row">
+              <div class="mead-crater-box" id="pistol-crater-number" title="MeadCraterNumber">—</div>
+              <input type="text" class="mead-filename-input" id="pistol-filename-input" placeholder="Enter folder name… 'invoice batch march'">
+            </div>
+
+            <!-- Column labels -->
+            <div class="mead-row mead-sublabel-row">
+              <span class="mead-sublabel mead-sublabel-crater">crater</span>
+              <span class="mead-sublabel">fitem_name_core</span>
+            </div>
+
+            <div class="mead-divider"></div>
+
+            <!-- Increment -->
+            <div class="mead-row">
+              <span class="mead-label">increment</span>
+              <div class="mead-btn-group" id="pistol-increment-group">
+                <button class="mead-toggle-btn" data-value="1">1</button>
+                <button class="mead-toggle-btn mead-active" data-value="2">2</button>
+                <button class="mead-toggle-btn" data-value="5">5</button>
+                <button class="mead-toggle-btn" data-value="10">10</button>
+                <button class="mead-toggle-btn" data-value="custom">Custom</button>
+              </div>
+              <input type="number" class="mead-custom-input" id="pistol-custom-increment" style="display:none" min="0" placeholder="—">
+            </div>
+
+            <!-- File type -->
+            <div class="mead-row mead-filetype-row">
+              <span class="mead-label">file type</span>
+              <div class="mead-btn-group" id="pistol-filetype-group">
+                <button class="mead-toggle-btn" data-value="none">none</button>
+                <button class="mead-toggle-btn mead-active" data-value="xlsx">xlsx</button>
+                <button class="mead-toggle-btn" data-value="xls">xls</button>
+                <button class="mead-toggle-btn" data-value="csv">csv</button>
+                <button class="mead-toggle-btn" data-value="ts">ts</button>
+                <button class="mead-toggle-btn" data-value="tsx">tsx</button>
+                <button class="mead-toggle-btn" data-value="txt">txt</button>
+                <button class="mead-toggle-btn" data-value="html">html</button>
+                <button class="mead-toggle-btn" data-value="php">php</button>
+                <button class="mead-toggle-btn" data-value="docx">docx</button>
+              </div>
+            </div>
+
+            <div class="mead-divider"></div>
+
+            <!-- Housing strategy -->
+            <div class="mead-row">
+              <span class="mead-label">housing</span>
+              <select class="mead-select" id="pistol-housing-select">
+                <option value="end-selected">create in end-selected folder</option>
+                <option value="cauldron" disabled>create in cauldron vat paradigm</option>
+                <option value="selected-col" disabled>create in selected column</option>
+                <option value="active-folder" disabled>create in selected column's active folder</option>
+              </select>
+            </div>
+
+            <!-- Silo constrained -->
+            <div class="mead-row">
+              <span class="mead-label">silo-constrained</span>
+              <select class="mead-select" id="pistol-silo-select">
+                <option>supra2pallet</option>
+                <option>supra1pallet</option>
+                <option selected>pallet</option>
+                <option>barrel</option>
+                <option>cauldron</option>
+                <option>vat</option>
+                <option>wok</option>
+                <option>sub1wok</option>
+                <option>sub2wok</option>
+                <option>sub3wok</option>
+                <option>sub4wok</option>
+                <option>sub5wok</option>
+                <option>sub6wok</option>
+              </select>
+            </div>
+
+            <!-- Raw file source -->
+            <div class="mead-row">
+              <span class="mead-label">raw file source</span>
+              <select class="mead-select" id="pistol-rawsource-select">
+                <option value="blank">use blank file from scratch</option>
+                <option value="template" disabled>use template files (coming soon)</option>
+              </select>
+            </div>
+
+            <div class="mead-divider"></div>
+
+            <!-- Action buttons -->
+            <div class="mead-row mead-action-row">
+              <button class="mead-action-btn" id="pistol-create-folder-btn">create folder</button>
+              <button class="mead-action-btn" id="pistol-folder-file-btn">+ folder &amp; file</button>
+              <button class="mead-action-btn" id="pistol-open-btn">+open</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="streams-container">
+      <div class="stream-group" id="group-1">
+        <div class="stream" data-stream-id="1">
+          <div class="stream-header">
+            <h3>Stream 1</h3>
+            <button class="stream-menu-btn">⋮</button>
+          </div>
+          <div class="stream-content">
+            <div class="drop-zone">
+              <p>Drop folders here or click + to add</p>
+            </div>
+            <ul class="folder-list"></ul>
+          </div>
+        </div>
+
+        <div class="stream" data-stream-id="2">
+          <div class="stream-header">
+            <h3>Stream 2</h3>
+            <button class="stream-menu-btn">⋮</button>
+          </div>
+          <div class="stream-content">
+            <div class="drop-zone">
+              <p>Drop folders here or click + to add</p>
+            </div>
+            <ul class="folder-list"></ul>
+          </div>
+        </div>
+
+        <div class="stream" data-stream-id="3">
+          <div class="stream-header">
+            <h3>Stream 3</h3>
+            <button class="stream-menu-btn">⋮</button>
+          </div>
+          <div class="stream-content">
+            <div class="drop-zone">
+              <p>Drop folders here or click + to add</p>
+            </div>
+            <ul class="folder-list"></ul>
+          </div>
+        </div>
+
+        <div class="stream" data-stream-id="4">
+          <div class="stream-header">
+            <h3>Stream 4</h3>
+            <button class="stream-menu-btn">⋮</button>
+          </div>
+          <div class="stream-content">
+            <div class="drop-zone">
+              <p>Drop folders here or click + to add</p>
+            </div>
+            <ul class="folder-list"></ul>
+          </div>
+        </div>
+
+        <div class="stream" data-stream-id="5">
+          <div class="stream-header">
+            <h3>Stream 5</h3>
+            <button class="stream-menu-btn">⋮</button>
+          </div>
+          <div class="stream-content">
+            <div class="drop-zone">
+              <p>Drop folders here or click + to add</p>
+            </div>
+            <ul class="folder-list"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="stream-group" id="group-2">
+        <div class="stream" data-stream-id="6">
+          <div class="stream-header">
+            <h3>Stream 6</h3>
+            <button class="stream-menu-btn">⋮</button>
+          </div>
+          <div class="stream-content">
+            <div class="drop-zone">
+              <p>Drop folders here or click + to add</p>
+            </div>
+            <ul class="folder-list"></ul>
+          </div>
+        </div>
+
+        <div class="stream" data-stream-id="7">
+          <div class="stream-header">
+            <h3>Stream 7</h3>
+            <button class="stream-menu-btn">⋮</button>
+          </div>
+          <div class="stream-content">
+            <div class="drop-zone">
+              <p>Drop folders here or click + to add</p>
+            </div>
+            <ul class="folder-list"></ul>
+          </div>
+        </div>
+
+        <div class="stream" data-stream-id="8">
+          <div class="stream-header">
+            <h3>Stream 8</h3>
+            <button class="stream-menu-btn">⋮</button>
+          </div>
+          <div class="stream-content">
+            <div class="drop-zone">
+              <p>Drop folders here or click + to add</p>
+            </div>
+            <ul class="folder-list"></ul>
+          </div>
+        </div>
+
+        <div class="stream" data-stream-id="9">
+          <div class="stream-header">
+            <h3>Stream 9</h3>
+            <button class="stream-menu-btn">⋮</button>
+          </div>
+          <div class="stream-content">
+            <div class="drop-zone">
+              <p>Drop folders here or click + to add</p>
+            </div>
+            <ul class="folder-list"></ul>
+          </div>
+        </div>
+
+        <div class="stream" data-stream-id="10">
+          <div class="stream-header">
+            <h3>Stream 10</h3>
+            <button class="stream-menu-btn">⋮</button>
+          </div>
+          <div class="stream-content">
+            <div class="drop-zone">
+              <p>Drop folders here or click + to add</p>
+            </div>
+            <ul class="folder-list"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="stream-group" id="group-jupiter">
+        <div class="jupiter-container">
+          <div class="jupiter-header">
+            <h2>Jupiter - File Actions</h2>
+          </div>
+          
+          <div class="selected-file-display">
+            <div class="file-icon">📄</div>
+            <div class="file-info">
+              <div class="file-name" id="jupiter-file-name">No file selected</div>
+              <div class="file-path" id="jupiter-file-path">Use keyboard shortcut to select a file</div>
+            </div>
+          </div>
+          
+          <div class="file-status-indicator" id="file-status-indicator" style="display: none;">
+            <div class="status-icon" id="status-icon">●</div>
+            <div class="status-text" id="status-text">Checking file status...</div>
+          </div>
+          
+          <div class="jupiter-actions">
+            <h3>Available Actions</h3>
+            <div class="action-buttons">
+              <button class="jupiter-action-btn" id="jupiter-open-btn">Open</button>
+              <button class="jupiter-action-btn" id="jupiter-show-in-finder-btn">Show In Finder</button>
+              <div class="jupiter-stream-dropdown-container">
+                <button class="jupiter-action-btn" id="jupiter-add-to-stream-btn">Add to Stream ▼</button>
+                <div class="jupiter-stream-dropdown" id="jupiter-stream-dropdown" style="display: none;">
+                  <div class="jupiter-stream-option" data-stream="1">Stream 1</div>
+                  <div class="jupiter-stream-option" data-stream="2">Stream 2</div>
+                  <div class="jupiter-stream-option" data-stream="3">Stream 3</div>
+                  <div class="jupiter-stream-option" data-stream="4">Stream 4</div>
+                  <div class="jupiter-stream-option" data-stream="5">Stream 5</div>
+                  <div class="jupiter-stream-option" data-stream="6">Stream 6</div>
+                  <div class="jupiter-stream-option" data-stream="7">Stream 7</div>
+                  <div class="jupiter-stream-option" data-stream="8">Stream 8</div>
+                  <div class="jupiter-stream-option" data-stream="9">Stream 9</div>
+                  <div class="jupiter-stream-option" data-stream="10">Stream 10</div>
+                </div>
+              </div>
+              <button class="jupiter-action-btn">Copy to Clipboard</button>
+              <button class="jupiter-action-btn">Move to Folder</button>
+              <button class="jupiter-action-btn">Archive File</button>
+              <button class="jupiter-action-btn">Generate Thumbnail</button>
+              <button class="jupiter-action-btn">Share Link</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stream-group" id="group-meridian">
+        <div class="meridian-container">
+          <div class="meridian-header">
+            <h2>Meridian Board - File Processing Hub</h2>
+          </div>
+          
+          <div class="selected-file-display">
+            <div class="file-icon">📄</div>
+            <div class="file-info">
+              <div class="file-name" id="meridian-file-name">No file selected</div>
+              <div class="file-path" id="meridian-file-path">Drag a file to the Pavilion dock icon to get started</div>
+            </div>
+          </div>
+          
+          <div class="file-status-indicator" id="meridian-file-status-indicator" style="display: none;">
+            <div class="status-icon" id="meridian-status-icon">●</div>
+            <div class="status-text" id="meridian-status-text">Checking file status...</div>
+          </div>
+          
+          <div class="meridian-actions">
+            <h3>Processing Options</h3>
+            <div class="action-buttons">
+              <button class="meridian-action-btn" id="meridian-open-btn">Open File</button>
+              <button class="meridian-action-btn" id="meridian-show-in-finder-btn">Show In Finder</button>
+              <div class="meridian-stream-dropdown-container">
+                <button class="meridian-action-btn" id="meridian-add-to-stream-btn">Add to Stream ▼</button>
+                <div class="meridian-stream-dropdown" id="meridian-stream-dropdown" style="display: none;">
+                  <div class="meridian-stream-option" data-stream="1">Stream 1</div>
+                  <div class="meridian-stream-option" data-stream="2">Stream 2</div>
+                  <div class="meridian-stream-option" data-stream="3">Stream 3</div>
+                  <div class="meridian-stream-option" data-stream="4">Stream 4</div>
+                  <div class="meridian-stream-option" data-stream="5">Stream 5</div>
+                  <div class="meridian-stream-option" data-stream="6">Stream 6</div>
+                  <div class="meridian-stream-option" data-stream="7">Stream 7</div>
+                  <div class="meridian-stream-option" data-stream="8">Stream 8</div>
+                  <div class="meridian-stream-option" data-stream="9">Stream 9</div>
+                  <div class="meridian-stream-option" data-stream="10">Stream 10</div>
+                </div>
+              </div>
+              <button class="meridian-action-btn">Copy to Folder</button>
+              <button class="meridian-action-btn">Move to Folder</button>
+              <button class="meridian-action-btn">Create Archive</button>
+              <button class="meridian-action-btn">Generate Metadata</button>
+              <button class="meridian-action-btn">Duplicate File</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filegun Page -->
+      <div class="stream-group" id="group-filegun">
+        <div id="filegun-react-root" class="h-full">
+          <!-- React component will be mounted here -->
+        </div>
+      </div>
+
+      <!-- FolderJar Page -->
+      <div class="stream-group" id="group-folderjar">
+        <div class="folderjar-container">
+          <div class="page-header">
+            <div class="header-left">
+              <h2>📁 FolderJar - Folder Management</h2>
+            </div>
+            <div class="header-right">
+              <div class="text-sm">Environment: Development Only</div>
+              <div class="text-xs">Project: Pavilion</div>
+            </div>
+          </div>
+          
+          <!-- Search and Controls Bar -->
+          <div class="table-controls">
+            <div class="search-section">
+              <input 
+                type="text" 
+                id="folderjar-search" 
+                class="search-input" 
+                placeholder="Search folders..."
+              >
+            </div>
+            <div class="action-buttons">
+              <button class="action-btn" id="folderjar-create">Create New</button>
+              <button class="action-btn" id="folderjar-refresh">Refresh</button>
+              <select id="folderjar-items-per-page" class="items-select">
+                <option value="50">50 items</option>
+                <option value="100" selected>100 items</option>
+                <option value="200">200 items</option>
+                <option value="500">500 items</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="table-container">
+            <div class="table-scroll">
+              <table class="data-table" id="folderjar-table">
+                <thead>
+                  <tr>
+                    <th class="th-checkbox"><input type="checkbox" id="folderjar-select-all"></th>
+                    <th>ID</th>
+                    <th>Folder Name</th>
+                    <th>Folder Path</th>
+                    <th>Parent Path</th>
+                    <th>Depth</th>
+                    <th>Created</th>
+                    <th>Modified</th>
+                    <th>Accessed</th>
+                    <th>Protected</th>
+                    <th>Permissions</th>
+                    <th>Pinned</th>
+                    <th>Sync Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="folderjar-tbody">
+                  <!-- Table rows will be rendered here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-container">
+            <div class="pagination-info">
+              <span id="folderjar-showing">Showing 0-0 of 0</span>
+            </div>
+            <div class="pagination-controls">
+              <button class="pagination-btn" id="folderjar-prev">Previous</button>
+              <span id="folderjar-page-info">Page 1 of 1</span>
+              <button class="pagination-btn" id="folderjar-next">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- FobjectJar Page -->
+      <div class="stream-group" id="group-fobjectjar">
+        <div class="fobjectjar-container">
+          <div class="page-header">
+            <div class="header-left">
+              <h2>🗂️ FobjectJar - Unified File/Folder View</h2>
+            </div>
+            <div class="header-right">
+              <div class="text-sm">Environment: Development Only</div>
+              <div class="text-xs">Project: Pavilion</div>
+            </div>
+          </div>
+          
+          <!-- Search and Controls Bar -->
+          <div class="table-controls">
+            <div class="search-section">
+              <input 
+                type="text" 
+                id="fobjectjar-search" 
+                class="search-input" 
+                placeholder="Search files and folders..."
+              >
+              <select id="fobjectjar-type-filter" class="filter-select">
+                <option value="all">All Types</option>
+                <option value="file">Files Only</option>
+                <option value="folder">Folders Only</option>
+              </select>
+            </div>
+            <div class="action-buttons">
+              <button class="action-btn" id="fobjectjar-create-file">New File</button>
+              <button class="action-btn" id="fobjectjar-create-folder">New Folder</button>
+              <button class="action-btn" id="fobjectjar-refresh">Refresh</button>
+              <select id="fobjectjar-items-per-page" class="items-select">
+                <option value="50">50 items</option>
+                <option value="100" selected>100 items</option>
+                <option value="200">200 items</option>
+                <option value="500">500 items</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="table-container">
+            <div class="table-scroll">
+              <table class="data-table" id="fobjectjar-table">
+                <thead>
+                  <tr>
+                    <th class="th-checkbox"><input type="checkbox" id="fobjectjar-select-all"></th>
+                    <th>Type</th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Path</th>
+                    <th>Parent Path</th>
+                    <th>Size</th>
+                    <th>Extension</th>
+                    <th>Depth</th>
+                    <th>Created</th>
+                    <th>Modified</th>
+                    <th>Protected</th>
+                    <th>Pinned</th>
+                    <th>Sync Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="fobjectjar-tbody">
+                  <!-- Table rows will be rendered here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-container">
+            <div class="pagination-info">
+              <span id="fobjectjar-showing">Showing 0-0 of 0</span>
+            </div>
+            <div class="pagination-controls">
+              <button class="pagination-btn" id="fobjectjar-prev">Previous</button>
+              <span id="fobjectjar-page-info">Page 1 of 1</span>
+              <button class="pagination-btn" id="fobjectjar-next">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stream-group active" id="group-finder">
+        <div class="finder-container">
+          <div class="finder-toolbar">
+            <div class="finder-nav-buttons">
+              <button id="finder-back" class="finder-nav-btn" disabled title="Back">‹</button>
+              <button id="finder-forward" class="finder-nav-btn" disabled title="Forward">›</button>
+            </div>
+            
+            <div class="finder-quick-access">
+              <button class="finder-quick-btn" data-path="home" title="Home">🏠</button>
+              <button class="finder-quick-btn" data-path="desktop" title="Desktop">🖥</button>
+              <button class="finder-quick-btn" data-path="documents" title="Documents">📄</button>
+              <button class="finder-quick-btn" data-path="downloads" title="Downloads">⬇</button>
+            </div>
+            
+            <div class="finder-path-bar">
+              <div id="finder-breadcrumb" class="breadcrumb-nav"></div>
+            </div>
+            
+            <div class="finder-search-box">
+              <input type="text" id="finder-search" placeholder="Search" class="finder-search-input">
+            </div>
+            
+            <div class="finder-actions">
+              <button id="finder-new-folder" class="finder-action-btn" title="New Folder">📁+</button>
+              <button id="finder-delete" class="finder-action-btn" disabled title="Delete">🗑</button>
+            </div>
+            
+            <div class="finder-sort-options">
+              <select id="finder-sort" class="finder-sort-select">
+                <option value="name">Name</option>
+                <option value="date">Date Modified</option>
+                <option value="size">Size</option>
+                <option value="kind">Kind</option>
+              </select>
+            </div>
+            
+            <div class="finder-view-buttons">
+              <button class="finder-view-btn active" data-view="column" title="Column View">⊞</button>
+              <button class="finder-view-btn" data-view="list" title="List View">☰</button>
+              <button class="finder-view-btn" data-view="icon" title="Icon View">⊡</button>
+            </div>
+          </div>
+          
+          <div class="finder-columns-container">
+            <div class="silo-i">silo i</div>
+            <div class="silo-j">
+              <div class="silo-j-header">silo j</div>
+              <div class="silo-j-content">
+                <div class="finder-sidebar-section">
+                  <div class="sidebar-section-title">Favorites</div>
+                  <div class="sidebar-favorites">
+                    <div class="sidebar-item" data-path="home">🏠 Home</div>
+                    <div class="sidebar-item" data-path="desktop">🖥 Desktop</div>
+                    <div class="sidebar-item" data-path="documents">📄 Documents</div>
+                    <div class="sidebar-item" data-path="downloads">⬇ Downloads</div>
+                    <div class="sidebar-item" data-path="applications">📱 Applications</div>
+                  </div>
+                </div>
+                <div class="finder-sidebar-section" id="cloud-storage-section">
+                  <div class="sidebar-section-title">Cloud Storage</div>
+                  <div class="sidebar-cloud-storage" id="sidebar-cloud-storage">
+                  </div>
+                </div>
+                <div class="finder-sidebar-section" id="elevated-section">
+                  <div class="sidebar-section-title">Elevated</div>
+                  <div class="sidebar-elevated" id="sidebar-elevated">
+                  </div>
+                </div>
+                <div class="finder-sidebar-section" id="basin-section">
+                  <div class="sidebar-section-title">Designated Basins</div>
+                  <div class="sidebar-basin" id="sidebar-basin">
+                  </div>
+                </div>
+                <div class="finder-sidebar-section">
+                  <div class="sidebar-section-title">Recents</div>
+                  <div class="sidebar-recents" id="sidebar-recents">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="silo-k">silo k</div>
+            <div class="silo-l" id="silo-l">
+              <div class="silo-l-header">silo l 1</div>
+              <div class="silo-l-header">
+                silo l 2<br>
+                <select id="silo-l-stream-select" class="silo-l-select">
+                  <option value="">Select a Stream</option>
+                  <option value="1">Stream 1</option>
+                  <option value="2">Stream 2</option>
+                  <option value="3">Stream 3</option>
+                  <option value="4">Stream 4</option>
+                  <option value="5">Stream 5</option>
+                  <option value="6">Stream 6</option>
+                  <option value="7">Stream 7</option>
+                  <option value="8">Stream 8</option>
+                  <option value="9">Stream 9</option>
+                  <option value="10">Stream 10</option>
+                </select>
+              </div>
+              <div class="silo-l-header">
+                silo l 3<br>
+                <input type="text" id="silo-l-path-input" class="silo-l-path-input" placeholder="/Users/johnsmith/Documents/main-repo">
+                <button id="silo-l-add-btn" class="silo-l-add-btn" disabled>add to stream</button>
+              </div>
+              <div class="silo-l-header">designated items</div>
+              <div class="silo-l-content" id="silo-l-content">
+                <!-- Stream items will be populated here -->
+              </div>
+              <div class="silo-l-resize-handle" id="silo-l-resize-handle"></div>
+            </div>
+            <div class="silo-m">
+              <button id="silo-m-refresh-btn" class="silo-m-refresh-btn" title="Refresh">↻</button>
+              <span>silo m</span>
+            </div>
+            <div class="finder-columns" id="finder-columns">
+            </div>
+            <div class="finder-resize-handle" id="finder-resize-handle"></div>
+            <div class="finder-preview" id="finder-preview">
+              <div class="preview-content">
+                <div class="preview-icon"></div>
+                <div class="preview-name"></div>
+                <div class="preview-details"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="context-menu" id="folder-context-menu">
+    <div class="context-menu-item" data-action="open">Open</div>
+    <div class="context-menu-item" data-action="reveal">Reveal in Finder</div>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item" data-action="remove">Remove from Stream</div>
+  </div>
+
+  <div class="context-menu" id="finder-context-menu">
+    <div class="context-menu-item" data-action="elevate" id="finder-menu-elevate">Elevate this folder</div>
+    <div class="context-menu-item" data-action="basin" id="finder-menu-basin">Designate this folder as a "basin" folder</div>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item" data-action="finder-open">Open</div>
+    <div class="context-menu-item" data-action="finder-reveal">Reveal in Finder</div>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item context-menu-item-danger" data-action="finder-delete">Delete</div>
+  </div>
+
+  <div class="context-menu" id="silo-j-elevated-context-menu">
+    <div class="context-menu-item" data-action="remove-elevated">Remove "elevated" property</div>
+  </div>
+
+  <div class="context-menu" id="silo-j-basin-context-menu">
+    <div class="context-menu-item" data-action="set-default-basin">Make this the "default" basin</div>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item" data-action="remove-basin">Remove "basin" property</div>
+  </div>
+
+  <script src="renderer.js"></script>
+  <script src="filegun-functions.js"></script>
+  <script src="dist/react-bundle.js"></script>
+</body>
+</html>
