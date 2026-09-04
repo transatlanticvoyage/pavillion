@@ -1,48 +1,34 @@
 {
-  "name": "pavilion",
+  "name": "pavillion",
+  "productName": "Pavillion",
   "version": "1.0.0",
   "description": "A multi-sidebar file manager for macOS",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "package": "electron-packager . Pavilion --platform=darwin --arch=x64 --out=dist/ --overwrite",
-    "build": "electron-builder"
+    "dist": "electron-builder --mac --dir",
+    "rebuild": "electron-rebuild -f -w better-sqlite3"
   },
   "author": "Kyle Campbell",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.28.4",
-    "@babel/preset-react": "^7.27.1",
-    "@tailwindcss/postcss": "^4.1.14",
-    "autoprefixer": "^10.4.21",
-    "babel-loader": "^10.0.0",
-    "buffer": "^6.0.3",
-    "css-loader": "^7.1.2",
     "electron": "^27.0.0",
     "electron-builder": "^24.6.4",
-    "electron-packager": "^17.1.1",
-    "electron-rebuild": "^3.2.9",
-    "postcss": "^8.5.6",
-    "postcss-loader": "^8.2.0",
-    "process": "^0.11.10",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "style-loader": "^4.0.0",
-    "tailwindcss": "^4.1.14",
-    "webpack": "^5.102.1",
-    "webpack-cli": "^6.0.1"
+    "electron-rebuild": "^3.2.9"
   },
   "build": {
-    "appId": "com.pavilion.app",
-    "productName": "Pavilion",
+    "appId": "com.pavillion.app",
+    "productName": "Pavillion",
+    "asar": false,
     "directories": {
       "output": "dist"
     },
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "assets/icon.icns"
-    }
+    },
+    "npmRebuild": false
   },
   "dependencies": {
     "better-sqlite3": "^12.4.1"

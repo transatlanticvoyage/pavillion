@@ -3,9 +3,43 @@ const path = require('path');
 const fs = require('fs');
 const Database = require('better-sqlite3');
 
+// Runtime app name. Must match `productName` in package.json, because this is
+// what determines app.getPath('userData') → ~/Library/Application Support/Pavillion.
+// (Changing it moves the userData dir, which is where pavilion.db and
+// pavilion-config.json live — see the dev doc before touching it.)
+app.setName('Pavillion');
+
 let mainWindow;
 let userDataPath;
 let db;
+let isQuitting = false;   // true only once a real quit is underway
+
+// ── Single-instance lock ─────────────────────────────────────────────────────
+// Pavillion is resident (it stays alive with the window hidden), so a second
+// launch must never spawn a second process — that is what puts a duplicate icon
+// in the Dock. Hand focus to the instance that already owns the lock and exit.
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', (event, argv) => {
+    showMainWindow();
+    // A second launch may carry a pavilion:// URL (Gazebo's Finder extension
+    // fires these); forward it to the live instance.
+    const url = argv.find((a) => a.startsWith('pavilion://'));
+    if (url) handleProtocolUrl(url);
+  });
+}
+
+// Bring the window back whether it is hidden, minimized, or closed.
+function showMainWindow() {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    createWindow();
+    return;
+  }
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.show();
+  mainWindow.focus();
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -25,12 +59,20 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
 
-  // Always open DevTools for debugging
-  mainWindow.webContents.openDevTools();
-  
   if (process.argv.includes('--dev')) {
     mainWindow.webContents.openDevTools();
   }
+
+  // Closing the window HIDES it rather than tearing the app down. Pavillion is
+  // resident so the F9 global hotkey keeps working from other apps — quitting on
+  // window close would silently kill the hotkey until the next manual launch.
+  // A real quit (Cmd-Q / app.quit()) sets isQuitting and falls through.
+  mainWindow.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault();
+      mainWindow.hide();
+    }
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -125,8 +167,23 @@ app.whenReady().then(() => {
   userDataPath = path.join(app.getPath('userData'), 'pavilion-config.json');
   initializeDatabase();
   
-  // Register custom protocol for Gazebo helper
+  // Register custom protocol for the Gazebo helper.
+  // NOTE: the scheme stays spelled 'pavilion' (one L) on purpose, even though the
+  // app is now named Pavillion. Gazebo's Finder Sync extension hardcodes it at
+  // Gazebo/GazeboFinderExtension/FinderSync.swift:145 —
+  //   "pavilion://add-to-stream?stream=...&items=..."
+  // Renaming the scheme silently breaks Finder right-click integration and would
+  // require rebuilding and re-signing Gazebo's extension. Leave it alone.
   app.setAsDefaultProtocolClient('pavilion');
+
+  // Start at login, so the F9 hotkey is available without launching anything.
+  if (process.platform === 'darwin') {
+    try {
+      app.setLoginItemSettings({ openAtLogin: true, openAsHidden: false });
+    } catch (error) {
+      console.log('Could not set login item:', error.message);
+    }
+  }
   
   // Set dock icon for development
   if (process.platform === 'darwin') {
@@ -179,21 +236,26 @@ app.whenReady().then(() => {
   }, 1000);
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
+    showMainWindow();
   });
 });
 
 app.on('window-all-closed', () => {
-  // Unregister global shortcuts
-  globalShortcut.unregisterAll();
-  // Close database if it exists
-  if (db) {
-    db.close();
+  // Deliberately does NOT quit on macOS. Pavillion stays resident so the global
+  // hotkey keeps working; the Dock icon reopens the window via 'activate'.
+  if (process.platform !== 'darwin') {
+    app.quit();
   }
-  // Quit app completely when window closes (even on macOS)
-  app.quit();
+});
+
+// Real teardown happens here — on an actual quit, not on a window close.
+app.on('before-quit', () => {
+  isQuitting = true;
+  globalShortcut.unregisterAll();
+  if (db) {
+    try { db.close(); } catch (error) { /* already closed */ }
+    db = null;
+  }
 });
 
 function handleJupiterHotkey() {
@@ -229,7 +291,7 @@ function handleJupiterHotkey() {
       // Switch to Jupiter tab and set the file
       mainWindow.webContents.send('jupiter-file-selected', filePath);
       
-      // Bring Pavilion to front
+      // Bring Pavillion to front
       mainWindow.show();
       mainWindow.focus();
       app.focus();
@@ -239,11 +301,21 @@ function handleJupiterHotkey() {
   });
 }
 
-// Handle custom protocol (from Gazebo helper)
+// Handle custom protocol (from Gazebo helper).
+// Extracted into a named function so the single-instance 'second-instance'
+// handler can replay a URL that arrived on a second launch.
 app.on('open-url', (event, url) => {
   event.preventDefault();
+  handleProtocolUrl(url);
+});
+
+function handleProtocolUrl(url) {
   console.log('Received URL:', url);
-  
+
+  // Pavillion may be sitting hidden (resident mode) — surface it before we
+  // push anything at the renderer.
+  showMainWindow();
+
   if (url.startsWith('pavilion://jupiter-file')) {
     const urlParams = new URL(url);
     const filePath = urlParams.searchParams.get('path');
@@ -277,7 +349,7 @@ app.on('open-url', (event, url) => {
       }
     }
   }
-});
+}
 
 ipcMain.handle('select-folder', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {

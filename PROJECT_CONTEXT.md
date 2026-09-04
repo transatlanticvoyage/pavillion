@@ -1,3 +1,21 @@
+> **⚠️ SUPERSEDED — HISTORICAL DOCUMENT (archived 2026-09-04)**
+>
+> This describes an abandoned attempt to port the Next.js Filegun pages into
+> Pavillion as React components. That layer was never wired up: nothing ever
+> called `window.mountReactComponent`, and `dist/react-bundle.js` was last built
+> Oct 2025 while `renderer.js` kept being developed through Jun 2026.
+>
+> The React/webpack/Tailwind layer was removed on 2026-09-04 (`src/react/`,
+> `webpack.config.js`, `tailwind.config.js`, `postcss.config.js`, the bundle, and
+> the related devDependencies). The live app is plain `renderer.js` +
+> `filegun-functions.js`, same shape as Solstice.
+>
+> Paths in this document also predate the repo move to `Cabinet/`.
+>
+> **Current docs:** `../pavillion-dev-maintenance-documentation/pavillion-dev-setup.md`
+
+---
+
 # Pavillion Project Context - Complete Implementation Guide
 
 ## Project Overview
