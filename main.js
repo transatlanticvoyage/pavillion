@@ -185,9 +185,10 @@ app.whenReady().then(() => {
     }
   }
   
-  // Set dock icon for development
+  // Set dock icon for development (icon-dock.png = Apple's margin; the old
+  // full-size one is in assets/old-icons-full-size-no-margin/)
   if (process.platform === 'darwin') {
-    const iconPath = path.join(__dirname, 'assets/icon.png');
+    const iconPath = path.join(__dirname, 'assets/icon-dock.png');
     try {
       app.dock.setIcon(iconPath);
     } catch (error) {
