@@ -176,10 +176,11 @@ app.whenReady().then(() => {
   // require rebuilding and re-signing Gazebo's extension. Leave it alone.
   app.setAsDefaultProtocolClient('pavilion');
 
-  // Start at login, so the F9 hotkey is available without launching anything.
+  // Do NOT start at login (turned off 2026-11-04: rarely used now). This also
+  // clears any login item an older build registered.
   if (process.platform === 'darwin') {
     try {
-      app.setLoginItemSettings({ openAtLogin: true, openAsHidden: false });
+      app.setLoginItemSettings({ openAtLogin: false });
     } catch (error) {
       console.log('Could not set login item:', error.message);
     }
