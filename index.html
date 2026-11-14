@@ -788,5 +788,14 @@
 
   <script src="renderer.js"></script>
   <script src="filegun-functions.js"></script>
+<!-- Window grip (kc, 2026-11-14): pressing a dead spot and moving the mouse must
+     select text, never move the window. So no element is a drag region except this
+     small grip beside the traffic lights, which is the only place that moves the window. -->
+<style>
+  *:not(.suite-window-grip) { -webkit-app-region: no-drag !important; }
+  .suite-window-grip { position: fixed; top: 0; left: 0; width: 80px; height: 30px;
+                       z-index: 2147483647; -webkit-app-region: drag !important; }
+</style>
+<div class="suite-window-grip" title="drag here to move the window"></div>
 </body>
 </html>
